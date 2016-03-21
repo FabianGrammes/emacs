@@ -11,11 +11,21 @@
 (add-to-list 'package-archives '("marm" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
 
+;;theme
+;(load-theme 'color-theme-sanityinc-solarized t)
+;(color-theme-sanityinc-solarized--define-theme dark
+
+
 ;; Bookmarks
 (require 'bookmark+)
 (setq inhibit-splash-screen t)
 (bookmark-bmenu-list)
 (switch-to-buffer "*Bookmark List*")
+
+;; TRAMP
+(require 'tramp)
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+(setq tramp-default-method "scp")
 
 ;; Autopair brakets
 (require 'autopair)
@@ -23,11 +33,24 @@
 
 ;; MaGit
 (require 'magit)
-(setq magit-last-seen-setup-instructions "1.4.0") ;;do not show warning messages
+;(setq magit-last-seen-setup-instructions "1.4.0") ;;do not show warning messages
+
 
 ;; HTMLIZE
 (require 'htmlize)
 
+;; ESSH
+(require 'essh)                                                    ;;
+(defun essh-sh-hook ()                                             
+  (define-key sh-mode-map "\C-c\C-o" 'pipe-region-to-shell)
+  (define-key sh-mode-map "\C-c\C-b" 'pipe-buffer-to-shell)        
+  (define-key sh-mode-map "\C-c\C-j" 'pipe-line-to-shell) 
+  (define-key sh-mode-map "\C-c\C-n" 'pipe-line-to-shell-and-step) 
+  (define-key sh-mode-map "\C-c\C-f" 'pipe-function-to-shell))      
+  ;;  (define-key sh-mode-map "\C-c\C-d" 'shell-cd-current-directory)) 
+  (add-hook 'sh-mode-hook 'essh-sh-hook)
+  
+  
 ;; ibuffer
 (defalias 'list-buffers 'ibuffer) ; make ibuffer default
 
@@ -39,7 +62,7 @@
 (global-auto-complete-mode t)
 
 ;; SLURM
-(add-to-list 'exec-path "/Users/fabig/Library/Preferences/Aquamacs Emacs/slurm.el-issue1")
+(add-to-list 'exec-path "/Users/fabig/Library/Preferences/Aquamacs Emacs/slurm.el-issue1/")
 (require 'slurm-mode)
 (require 'slurm-script-mode)
 
@@ -57,6 +80,7 @@
     (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
     (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
+
 ;;==============================================================
 ;; CUSTOMIZATION
 
@@ -72,8 +96,17 @@
 (global-set-key (kbd "M-1") 'split-window-horizontally)
 (global-set-key (kbd "M-2") 'split-window-vertically)
 (global-set-key (kbd "M-3") 'delete-window)
-(global-set-key (kbd "M-4") 'delete-other-windows)
+;(global-set-key (kbd "M-4") 'delete-other-windows)
 (global-set-key (kbd "M-<tab>") 'other-window)
+
+(defun split-3-windows-horizontally-evenly ()
+  (interactive)
+  (command-execute 'split-window-horizontally)
+  (command-execute 'split-window-horizontally)
+  (command-execute 'balance-windows)
+)
+(global-set-key (kbd "M-4") 'split-3-windows-horizontally-evenly)
+
 
 (global-set-key (kbd "M-l") 'bookmark-bmenu-list)
 
@@ -104,6 +137,20 @@
 ;(require 'dired-sort-map)
 (setq dired-listing-switches "--group-directories-first -alh")
 ;--sort=extension
+
+
+;; Remote R function to run R on the cluster
+;; specified ssh -X settings in the .ssh/config file
+;; function to call shell and then type R
+(defun remote-R ()
+  (interactive)
+  (shell)
+  (insert "R")
+  (comint-send-input))
+
+; add keybinding for this (should be called when on remote)
+(global-set-key (kbd "C-c R") 'remote-R)
+
 
 ;;==============================================================
 ;; PYTHON
@@ -136,8 +183,7 @@
 ;; MYSQL settings
 (setq sql-mysql-options '("-C" "-t" "-f" "-n"))
 
-   
-;;==============================================================
+   ;;==============================================================
 ;; ORG MODE
 
 ;;disable the splash screen (to enable it agin, replace the t with 0)
@@ -164,12 +210,12 @@
 
 ;;;;org-mode configuration
 ;;make org-mode work with files ending in .org
-(setq load-path (cons "/Users/fabig/Library/Preferences/Aquamacs Emacs/org-8.2.10/lisp" load-path))
+(setq load-path (cons "/Users/fabig/Library/Preferences/Aquamacs Emacs/org-20160104" load-path))
 (require 'org)
 (require 'org-install)
-(require 'org-latex)
+;(require 'org-latex)
 (require 'org-habit)
-(require 'org-exp-blocks)
+;(require 'org-exp-blocks)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 
 ;; LATEX export code blocks
@@ -206,8 +252,8 @@
 ;; make sure markdown export option is active
 (eval-after-load "org" '(require 'ox-md nil t))
 (eval-after-load "org" '(require 'ox-gfm nil t))
-(eval-after-load "org" '(require 'ox-odt nil t))
 (eval-after-load "org" '(require 'ox-beamer nil t))
+
 
 ;; enable indention in R code bloks
 (defun dan/org-indent-region ()
@@ -253,7 +299,6 @@
                                    :bold t
                                   )))  "plum-box-face")
 
-
 (defun z-hi-lock-quizzes ()
   ;; this next line is necessary to correct sloppy hi-locking
   (if (not hi-lock-mode) 
@@ -275,8 +320,6 @@
 
 (add-hook 'org-mode-hook 'ae-hi-lock-features)
 
-
-
 ;;==============================================================
 ;; SPELL CHECKING
 
@@ -297,3 +340,34 @@
 (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
 
 
+;;
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(aquamacs-additional-fontsets nil t)
+ '(aquamacs-customization-version-id 307 t)
+ '(aquamacs-tool-bar-user-customization nil t)
+ '(background-color "#fcf4dc")
+ '(background-mode light)
+ '(bmkp-last-as-first-bookmark-file
+   "/Users/fabig/Library/Preferences/Aquamacs Emacs/Packages/bookmarks")
+ '(cursor-color "#52676f")
+ '(custom-enabled-themes (quote (sanityinc-solarized-dark)))
+ '(custom-safe-themes
+   (quote
+    ("4aee8551b53a43a883cb0b7f3255d6859d766b6c5e14bcb01bed572fcbef4328" "4cf3221feff536e2b3385209e9b9dc4c2e0818a69a1cdb4b522756bcdf4e00a4" "fc5fcb6f1f1c1bc01305694c59a1a861b008c534cae8d0e48e4d5e81ad718bc6" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
+ '(foreground-color "#52676f")
+ '(global-hl-line-mode t)
+ '(ns-tool-bar-display-mode (quote both) t)
+ '(ns-tool-bar-size-mode (quote regular) t)
+ '(one-buffer-one-frame-mode nil nil (aquamacs-frame-setup))
+ '(tabbar-mode t nil (tabbar))
+ '(visual-line-mode nil t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
