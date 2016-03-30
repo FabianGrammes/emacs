@@ -69,7 +69,7 @@
 ;; Fill column indicator
 (require 'fill-column-indicator)
 (setq fci-rule-width 2)
-(setq fci-rule-color "grey80")
+(setq fci-rule-color "grey90")
 (setq fci-rule-column 80)
 (add-hook 'after-change-major-mode-hook 'fci-mode)
 
@@ -163,8 +163,8 @@
 ;; Highlight indentations in python code
 (require 'highlight-indentation)
 (add-hook 'python-mode-hook 'highlight-indentation-mode)
-;(set-face-background 'highlight-indentation-face "gray80")
-(set-face-background 'highlight-indentation-face "light sky blue")
+(set-face-background 'highlight-indentation-face "gray60")
+;(set-face-background 'highlight-indentation-face "light sky blue")
 
 ;; Set PY horizontal window splitting 
 (require 'python-mode)
