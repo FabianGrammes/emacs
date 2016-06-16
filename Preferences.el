@@ -15,6 +15,13 @@
 ;(load-theme 'color-theme-sanityinc-solarized t)
 ;(color-theme-sanityinc-solarized--define-theme dark
 
+;;Coloring dired files
+(require 'diredful)
+(diredful-mode 1)
+;; Use the following comands to set custom coloring
+; M-x diredful-add
+; M-x diredful-edit
+; M-x diredful-delete
 
 ;; Bookmarks
 (require 'bookmark+)
@@ -186,29 +193,20 @@
    ;;==============================================================
 ;; ORG MODE
 
-;;disable the splash screen (to enable it agin, replace the t with 0)
-;(setq inhibit-splash-screen t)
-
-;;enable syntax highlighting
-;(global-font-lock-mode t)
-;(transient-mark-mode 1)
-
-;; fontify code in code blocks
-(setq org-src-fontify-natively t)
 
 (defface org-block-begin-line
   '((t (:underline "#A7A6AA" :foreground "FFFFFF" :background "#6c7b8b")))
   "Face used for the line delimiting the begin of source blocks.")
 
 (defface org-block-background
-  '((t (:background "#eff8fb")))
+  '((t (:background "green")))
   "Face used for the source block background.")
 
 (defface org-block-end-line
   '((t (:overline "#A7A6AA" :foreground "#FFFFFF" :background "#6c7b8b")))
   "Face used for the line delimiting the end of source blocks.")
 
-;;;;org-mode configuration
+;;;;ORG configuration
 ;;make org-mode work with files ending in .org
 (setq load-path (cons "/Users/fabig/Library/Preferences/Aquamacs Emacs/org-20160104" load-path))
 (require 'org)
@@ -217,6 +215,30 @@
 (require 'org-habit)
 ;(require 'org-exp-blocks)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+
+;; fontify code in code blocks
+(setq org-src-fontify-natively t)
+
+;; ORG agenda
+;(define-key global-map "\C-c l" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(setq org-log-done t)
+(setq org-agenda-files (list "~/Desktop/org/work.org"))
+
+;;disable the splash screen (to enable it agin, replace the t with 0)
+;(setq inhibit-splash-screen t)
+
+;;enable syntax highlighting
+;(global-font-lock-mode t)
+;(transient-mark-mode 1)
+
+;; from: http://aaronbedra.com/emacs.d/
+(setq org-log-done t
+      org-todo-keywords '((sequence "TODO" "INPROGRESS" "SOMEDAY" "DONE"))
+      org-todo-keyword-faces '(("INPROGRESS" . (:foreground "DarkOrchid1" :weight bold))
+			       ("SOMEDAY" . (:foreground "salmon" :weight bold)))
+      )
+
 
 ;; LATEX export code blocks
 ;(setq org-latex-listings 'listings)
