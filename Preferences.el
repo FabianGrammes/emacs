@@ -42,7 +42,6 @@
 (require 'magit)
 ;(setq magit-last-seen-setup-instructions "1.4.0") ;;do not show warning messages
 
-
 ;; HTMLIZE
 (require 'htmlize)
 
@@ -56,7 +55,6 @@
   (define-key sh-mode-map "\C-c\C-f" 'pipe-function-to-shell))      
   ;;  (define-key sh-mode-map "\C-c\C-d" 'shell-cd-current-directory)) 
   (add-hook 'sh-mode-hook 'essh-sh-hook)
-  
   
 ;; ibuffer
 (defalias 'list-buffers 'ibuffer) ; make ibuffer default
@@ -87,6 +85,11 @@
     (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
     (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
+;; SPARQL (with autocomplete)
+(autoload 'sparql-mode "sparql-mode.el"
+    "Major mode for editing SPARQL files" t)
+(add-to-list 'auto-mode-alist '("\\.sparql$" . sparql-mode))
+;(add-hook 'sparql-mode-hook 'auto-complete-mode)
 
 ;;==============================================================
 ;; CUSTOMIZATION
@@ -145,7 +148,6 @@
 (setq dired-listing-switches "--group-directories-first -alh")
 ;--sort=extension
 
-
 ;; Remote R function to run R on the cluster
 ;; specified ssh -X settings in the .ssh/config file
 ;; function to call shell and then type R
@@ -193,6 +195,8 @@
    ;;==============================================================
 ;; ORG MODE
 
+;; fontify code in code blocks
+(setq org-src-fontify-natively t)
 
 (defface org-block-begin-line
   '((t (:underline "#A7A6AA" :foreground "FFFFFF" :background "#6c7b8b")))
@@ -216,8 +220,7 @@
 ;(require 'org-exp-blocks)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 
-;; fontify code in code blocks
-(setq org-src-fontify-natively t)
+
 
 ;; ORG agenda
 ;(define-key global-map "\C-c l" 'org-store-link)
@@ -266,16 +269,29 @@
      (latex . t)
      (org . t)
      (sqlite . t)
+     (sparql . t)
    ))
 
 ;; Timestaps in TODO items
 (setq org-log-done 'time)
+
+;; Mobile org settings
+;; Set to the location of your Org files on your local system
+(setq org-directory "~/Desktop/org")
+;; Set to the name of the file where new notes will be stored
+(setq org-mobile-inbox-for-pull "~/Desktop/org/flagged.org")
+;; Set to <your Dropbox root directory>/MobileOrg.
+(setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
+
+
 
 ;; make sure markdown export option is active
 (eval-after-load "org" '(require 'ox-md nil t))
 (eval-after-load "org" '(require 'ox-gfm nil t))
 (eval-after-load "org" '(require 'ox-beamer nil t))
 
+;; make TAB behave nativly
+(setq org-src-tab-acts-natively t)
 
 ;; enable indention in R code bloks
 (defun dan/org-indent-region ()
