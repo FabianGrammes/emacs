@@ -4,6 +4,7 @@
 ;; evaluating this file and print errors in the *Messags* buffer.
 ;; Use this file in place of ~/.emacs (which is loaded as well.)
 
+;;==============================================================================
 ;; Melpa
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
@@ -11,9 +12,13 @@
 (add-to-list 'package-archives '("marm" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
 
-;;theme
-;(load-theme 'color-theme-sanityinc-solarized t)
-;(color-theme-sanityinc-solarized--define-theme dark
+;;==============================================================================
+;;=================== PROGRAMS =================================================
+;;==============================================================================
+;; TRAMP
+(require 'tramp)
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+(setq tramp-default-method "scp")
 
 ;;Coloring dired files
 (require 'diredful)
@@ -29,21 +34,9 @@
 (bookmark-bmenu-list)
 (switch-to-buffer "*Bookmark List*")
 
-;; TRAMP
-(require 'tramp)
-(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-(setq tramp-default-method "scp")
-
-;; Autopair brakets
-(require 'autopair)
-(autopair-global-mode 1)
-
 ;; MaGit
 (require 'magit)
 ;(setq magit-last-seen-setup-instructions "1.4.0") ;;do not show warning messages
-
-;; HTMLIZE
-(require 'htmlize)
 
 ;; ESSH
 (require 'essh)                                                    ;;
@@ -55,48 +48,33 @@
   (define-key sh-mode-map "\C-c\C-f" 'pipe-function-to-shell))      
   ;;  (define-key sh-mode-map "\C-c\C-d" 'shell-cd-current-directory)) 
   (add-hook 'sh-mode-hook 'essh-sh-hook)
-  
-;; ibuffer
-(defalias 'list-buffers 'ibuffer) ; make ibuffer default
-
-;; Auto complete
-(require 'auto-complete)
-(require 'auto-complete-config)
-(ac-config-default)
-;(add-hook 'python-mode-hook 'auto-complete-mode)
-(global-auto-complete-mode t)
 
 ;; SLURM
 (add-to-list 'exec-path "/Users/fabig/Library/Preferences/Aquamacs Emacs/slurm.el-issue1/")
 (require 'slurm-mode)
 (require 'slurm-script-mode)
 
-;; Fill column indicator
-(require 'fill-column-indicator)
-(setq fci-rule-width 2)
-(setq fci-rule-color "grey90")
-(setq fci-rule-column 80)
-(add-hook 'after-change-major-mode-hook 'fci-mode)
+;; When splitting vertically: copy file from dired1 to dired2
+(setq dired-dwim-target t)
 
-;; Markdown 
-(autoload 'markdown-mode "markdown-mode"
-       "Major mode for editing Markdown files" t)
-    (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
-    (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-    (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+;; Mac tweek to specify ls behaviour in dired
+(require 'ls-lisp)
+(setq ls-lisp-use-insert-directory-program t)
+(setq insert-directory-program "/usr/local/Cellar/coreutils/8.21/libexec/gnubin/ls")
+;(require 'dired-sort-map)
+(setq dired-listing-switches "--group-directories-first -alh")
+;--sort=extension
 
-;; SPARQL (with autocomplete)
-(autoload 'sparql-mode "sparql-mode.el"
-    "Major mode for editing SPARQL files" t)
-(add-to-list 'auto-mode-alist '("\\.sparql$" . sparql-mode))
-;(add-hook 'sparql-mode-hook 'auto-complete-mode)
+;; MYSQL settings
+(setq sql-mysql-options '("-C" "-t" "-f" "-n"))
 
-;;==============================================================
-;; CUSTOMIZATION
+;; polymode
+(require 'poly-R)
+(require 'poly-markdown)
 
-;;-----------------------------------
-;; Custom Global Key bindings
-
+;;==============================================================================
+;;================== KEY BINDINGS ==============================================
+;;==============================================================================
 ;;cycle buffers
 (global-set-key (kbd "M-<right>") 'next-buffer)
 (global-set-key (kbd "M-<left>") 'previous-buffer)
@@ -116,37 +94,9 @@
   (command-execute 'balance-windows)
 )
 (global-set-key (kbd "M-4") 'split-3-windows-horizontally-evenly)
-
-
 (global-set-key (kbd "M-l") 'bookmark-bmenu-list)
-
 ; using the C-b to jump between windows
 (global-set-key (kbd "C-b") 'switch-to-buffer)
-
-;; Highlight the current line
-(global-hl-line-mode 1)
-
-;; rainbow delimiters
-(when (require 'rainbow-delimiters nil 'noerror) 
-  (add-hook 'scheme-mode-hook 'rainbow-delimiters-mode))
-  (add-hook 'slime-mode-hook 'rainbow-delimiters-mode)  
-  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'python-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'R-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'org-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'sh-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'sql-mode-hook 'rainbow-delimiters-mode)
-
-;; When splitting vertically: copy file from dired1 to dired2
-(setq dired-dwim-target t)
-
-;; Mac tweek to specify ls behaviour in dired
-(require 'ls-lisp)
-(setq ls-lisp-use-insert-directory-program t)
-(setq insert-directory-program "/usr/local/Cellar/coreutils/8.21/libexec/gnubin/ls")
-;(require 'dired-sort-map)
-(setq dired-listing-switches "--group-directories-first -alh")
-;--sort=extension
 
 ;; Remote R function to run R on the cluster
 ;; specified ssh -X settings in the .ssh/config file
@@ -156,14 +106,69 @@
   (shell)
   (insert "R")
   (comint-send-input))
-
 ; add keybinding for this (should be called when on remote)
 (global-set-key (kbd "C-c R") 'remote-R)
 
+;;==============================================================================
+;;================== BUFFERS ===================================================
+;;==============================================================================
+;; Highlight the current line
+(global-hl-line-mode 1)
 
-;;==============================================================
-;; PYTHON
+;; Fill column indicator
+(require 'fill-column-indicator)
+(setq fci-rule-width 2)
+(setq fci-rule-color "grey90")
+(setq fci-rule-column 80)
+(add-hook 'after-change-major-mode-hook 'fci-mode)
 
+;; Autopair brakets
+(require 'autopair)
+(autopair-global-mode 1)
+
+;; HTMLIZE
+(require 'htmlize)
+
+;; ibuffer
+(defalias 'list-buffers 'ibuffer) ; make ibuffer default
+
+;; Auto complete
+(require 'auto-complete)
+(require 'auto-complete-config)
+(ac-config-default)
+;(add-hook 'python-mode-hook 'auto-complete-mode)
+(global-auto-complete-mode t)
+
+;; Markdown 
+(autoload 'markdown-mode "markdown-mode"
+       "Major mode for editing Markdown files" t)
+    (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
+    (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+    (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+;; rainbow delimiters
+(when (require 'rainbow-delimiters nil 'noerror) 
+  (add-hook 'scheme-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'slime-mode-hook 'rainbow-delimiters-mode)  
+  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'python-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'R-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'org-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'sh-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'sql-mode-hook 'rainbow-delimiters-mode))
+
+;;; MARKDOWN
+(add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+;;; R modes
+(add-to-list 'auto-mode-alist '("\\.Snw" . poly-noweb+r-mode))
+(add-to-list 'auto-mode-alist '("\\.Rnw" . poly-noweb+r-mode))
+(add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
+
+;;==============================================================================
+;;================== PROGRAM SETTINGS ==========================================
+;;==============================================================================
+
+;;++++++++++++++++ PYTHON ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 (require 'python-mode)
 (autoload 'python-mode "python-mode" "Python Mode." t)
 (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
@@ -186,18 +191,9 @@
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
 
-;;==============================================================
+;;++++++++++++++ ORG MODE ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-;;==============================================================
-;; MYSQL settings
-(setq sql-mysql-options '("-C" "-t" "-f" "-n"))
-
-   ;;==============================================================
-;; ORG MODE
-
-;; fontify code in code blocks
-(setq org-src-fontify-natively t)
-
+;; ORG APPEARANCE (does not work..)
 (defface org-block-begin-line
   '((t (:underline "#A7A6AA" :foreground "FFFFFF" :background "#6c7b8b")))
   "Face used for the line delimiting the begin of source blocks.")
@@ -210,7 +206,7 @@
   '((t (:overline "#A7A6AA" :foreground "#FFFFFF" :background "#6c7b8b")))
   "Face used for the line delimiting the end of source blocks.")
 
-;;;;ORG configuration
+;; ----- ORG configuration ------
 ;;make org-mode work with files ending in .org
 (setq load-path (cons "/Users/fabig/Library/Preferences/Aquamacs Emacs/org-20160104" load-path))
 (require 'org)
@@ -220,9 +216,10 @@
 ;(require 'org-exp-blocks)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 
+;; fontify code in code blocks
+(setq org-src-fontify-natively t)
 
-
-;; ORG agenda
+;;------ ORG agenda ------
 ;(define-key global-map "\C-c l" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
 (setq org-log-done t)
@@ -269,29 +266,16 @@
      (latex . t)
      (org . t)
      (sqlite . t)
-     (sparql . t)
    ))
 
 ;; Timestaps in TODO items
 (setq org-log-done 'time)
-
-;; Mobile org settings
-;; Set to the location of your Org files on your local system
-(setq org-directory "~/Desktop/org")
-;; Set to the name of the file where new notes will be stored
-(setq org-mobile-inbox-for-pull "~/Desktop/org/flagged.org")
-;; Set to <your Dropbox root directory>/MobileOrg.
-(setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
-
-
 
 ;; make sure markdown export option is active
 (eval-after-load "org" '(require 'ox-md nil t))
 (eval-after-load "org" '(require 'ox-gfm nil t))
 (eval-after-load "org" '(require 'ox-beamer nil t))
 
-;; make TAB behave nativly
-(setq org-src-tab-acts-natively t)
 
 ;; enable indention in R code bloks
 (defun dan/org-indent-region ()
@@ -322,8 +306,7 @@
    ((eq format 'latex)
     (format "{\\color{%s}%s}" path desc)))))
 
-;;==============================================================
-;; Highlight certain phrases in org-mode
+;; ------ Highlight certain phrases in org-mode ------
 
 (global-hi-lock-mode 1)
 (defface af-bold-blue-box '((t  (:background  "PaleTurquoise" 
@@ -358,27 +341,9 @@
 
 (add-hook 'org-mode-hook 'ae-hi-lock-features)
 
-;;==============================================================
-;; SPELL CHECKING
-
-;(setq ispell-dictionary "en_UK")
-
-;;==============================================================
-;; polymode
-
-(require 'poly-R)
-(require 'poly-markdown)
-
-;;; MARKDOWN
-(add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
-
-;;; R modes
-(add-to-list 'auto-mode-alist '("\\.Snw" . poly-noweb+r-mode))
-(add-to-list 'auto-mode-alist '("\\.Rnw" . poly-noweb+r-mode))
-(add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
-
-
-;;
+;;==============================================================================
+;;================== THEME SETTINGS ============================================
+;;==============================================================================
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -409,3 +374,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
