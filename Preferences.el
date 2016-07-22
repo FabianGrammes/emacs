@@ -72,6 +72,12 @@
 (require 'poly-R)
 (require 'poly-markdown)
 
+;; SPARQL mode
+(autoload 'sparql-mode "sparql-mode.el"
+    "Major mode for editing SPARQL files" t)
+(add-to-list 'auto-mode-alist '("\\.sparql$" . sparql-mode))
+
+
 ;;==============================================================================
 ;;================== KEY BINDINGS ==============================================
 ;;==============================================================================
@@ -114,6 +120,7 @@
 ;;==============================================================================
 ;; Highlight the current line
 (global-hl-line-mode 1)
+(set-face-background 'hl-line "grey65")
 
 ;; Fill column indicator
 (require 'fill-column-indicator)
@@ -168,6 +175,25 @@
 ;;================== PROGRAM SETTINGS ==========================================
 ;;==============================================================================
 
+;;++++++++++++++++ R +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+;;; ESS indentation
+(add-hook 'ess-mode-hook
+      (lambda ()
+        (ess-set-style 'C++ 'quiet)
+        ;; Because
+        ;;                                 DEF GNU BSD K&R C++
+        ;; ess-indent-level                  2   2   8   5   4
+        ;; ess-continued-statement-offset    2   2   8   5   4
+        ;; ess-brace-offset                  0   0  -8  -5  -4
+        ;; ess-arg-function-offset           2   4   0   0   0
+        ;; ess-expression-offset             4   2   8   5   4
+        ;; ess-else-offset                   0   0   0   0   0
+        ;; ess-close-brace-offset            0   0   0   0   0
+        (add-hook 'local-write-file-hooks
+              (lambda ()
+            (ess-nuke-trailing-whitespace)))))
+;;(setq ess-nuke-trailing-whitespace-p 'ask)
+
 ;;++++++++++++++++ PYTHON ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 (require 'python-mode)
 (autoload 'python-mode "python-mode" "Python Mode." t)
@@ -205,6 +231,7 @@
 (defface org-block-end-line
   '((t (:overline "#A7A6AA" :foreground "#FFFFFF" :background "#6c7b8b")))
   "Face used for the line delimiting the end of source blocks.")
+
 
 ;; ----- ORG configuration ------
 ;;make org-mode work with files ending in .org
@@ -255,7 +282,7 @@
 (setq org-confirm-babel-evaluate nil) 
 (setq org-export-babel-evaluate nil) 
 
-
+;; Language support for ORG MODE
 (org-babel-do-load-languages
  'org-babel-load-languages
   '( (R . t)         
@@ -266,6 +293,7 @@
      (latex . t)
      (org . t)
      (sqlite . t)
+     (sparql . t)
    ))
 
 ;; Timestaps in TODO items
