@@ -40,13 +40,13 @@
 
 ;; ESSH
 (require 'essh)                                                    ;;
-(defun essh-sh-hook ()                                             
+(defun essh-sh-hook ()
   (define-key sh-mode-map "\C-c\C-o" 'pipe-region-to-shell)
-  (define-key sh-mode-map "\C-c\C-b" 'pipe-buffer-to-shell)        
-  (define-key sh-mode-map "\C-c\C-j" 'pipe-line-to-shell) 
-  (define-key sh-mode-map "\C-c\C-n" 'pipe-line-to-shell-and-step) 
-  (define-key sh-mode-map "\C-c\C-f" 'pipe-function-to-shell))      
-  ;;  (define-key sh-mode-map "\C-c\C-d" 'shell-cd-current-directory)) 
+  (define-key sh-mode-map "\C-c\C-b" 'pipe-buffer-to-shell)
+  (define-key sh-mode-map "\C-c\C-j" 'pipe-line-to-shell)
+  (define-key sh-mode-map "\C-c\C-n" 'pipe-line-to-shell-and-step)
+  (define-key sh-mode-map "\C-c\C-f" 'pipe-function-to-shell))
+  ;;  (define-key sh-mode-map "\C-c\C-d" 'shell-cd-current-directory))
   (add-hook 'sh-mode-hook 'essh-sh-hook)
 
 ;; SLURM
@@ -146,7 +146,7 @@
 ;(add-hook 'python-mode-hook 'auto-complete-mode)
 (global-auto-complete-mode t)
 
-;; Markdown 
+;; Markdown
 (autoload 'markdown-mode "markdown-mode"
        "Major mode for editing Markdown files" t)
     (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
@@ -154,9 +154,9 @@
     (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
 ;; rainbow delimiters
-(when (require 'rainbow-delimiters nil 'noerror) 
+(when (require 'rainbow-delimiters nil 'noerror)
   (add-hook 'scheme-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'slime-mode-hook 'rainbow-delimiters-mode)  
+  (add-hook 'slime-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'python-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'R-mode-hook 'rainbow-delimiters-mode)
@@ -177,9 +177,9 @@
 
 ;;++++++++++++++++ R +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;;; ESS indentation
-(add-hook 'ess-mode-hook
-      (lambda ()
-        (ess-set-style 'C++ 'quiet)
+;(add-hook 'ess-mode-hook
+;      (lambda ()
+;        (ess-set-style 'C++ 'quiet)
         ;; Because
         ;;                                 DEF GNU BSD K&R C++
         ;; ess-indent-level                  2   2   8   5   4
@@ -189,10 +189,35 @@
         ;; ess-expression-offset             4   2   8   5   4
         ;; ess-else-offset                   0   0   0   0   0
         ;; ess-close-brace-offset            0   0   0   0   0
-        (add-hook 'local-write-file-hooks
-              (lambda ()
-            (ess-nuke-trailing-whitespace)))))
+;        (add-hook 'local-write-file-hooks
+;              (lambda ()
+;            (ess-nuke-trailing-whitespace)))))
 ;;(setq ess-nuke-trailing-whitespace-p 'ask)
+ 
+
+;; Formatting Style 
+;;
+
+(add-to-list 'ess-style-alist
+             '(my-ess-style
+               (ess-indent-level . 4)
+               (ess-first-continued-statement-offset . 2)
+               (ess-continued-statement-offset . 0)
+               (ess-brace-offset . -4)
+               (ess-expression-offset . 4)
+               (ess-else-offset . 0)
+               (ess-close-brace-offset . 0)
+               (ess-brace-imaginary-offset . 0)
+               (ess-continued-brace-offset . 0)
+               (ess-arg-function-offset . 4)
+           (ess-arg-function-offset-new-line . '(4))
+               ))
+(setq ess-default-style 'my-ess-style)
+
+(require 'key-chord)
+(key-chord-mode 1)
+(key-chord-define ess-mode-map ">>" "%>%")
+(key-chord-define ess-mode-map "%%" "%in%")
 
 ;;++++++++++++++++ PYTHON ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 (require 'python-mode)
@@ -203,14 +228,14 @@
 ;; Highlight indentations in python code
 (require 'highlight-indentation)
 (add-hook 'python-mode-hook 'highlight-indentation-mode)
-(set-face-background 'highlight-indentation-face "gray60")
+(set-face-background 'highlight-indentation-face "plum2")
 ;(set-face-background 'highlight-indentation-face "light sky blue")
 
-;; Set PY horizontal window splitting 
+;; Set PY horizontal window splitting
 (require 'python-mode)
 (setq-default py-split-windows-on-execute-function 'split-window-horizontally)
 
-;; Customize keybinding  
+;; Customize keybinding
 (define-key python-mode-map "\C-c\C-r" 'py-execute-region)
 
 ;; Enable Jedi auto-complete
@@ -261,7 +286,7 @@
 
 ;; from: http://aaronbedra.com/emacs.d/
 (setq org-log-done t
-      org-todo-keywords '((sequence "TODO" "INPROGRESS" "SOMEDAY" "DONE"))
+      org-todo-keywords '((sequence "TODO" "DONE" "INPROGRESS" "SOMEDAY" ))
       org-todo-keyword-faces '(("INPROGRESS" . (:foreground "DarkOrchid1" :weight bold))
 			       ("SOMEDAY" . (:foreground "salmon" :weight bold)))
       )
@@ -278,18 +303,18 @@
 ;(add-to-list 'org-latex-packages-alist '("" "minted"))
 
 ;; stop C-c C-c within code blocks from querying
-;; and stop automatic evaluation of blocks upon export 
-(setq org-confirm-babel-evaluate nil) 
-(setq org-export-babel-evaluate nil) 
+;; and stop automatic evaluation of blocks upon export
+(setq org-confirm-babel-evaluate nil)
+(setq org-export-babel-evaluate nil)
 
 ;; Language support for ORG MODE
 (org-babel-do-load-languages
  'org-babel-load-languages
-  '( (R . t)         
+  '( (R . t)
      (python . t)
      (sql . t)
-     (emacs-lisp . t)  
-     (sh . t) 
+     (emacs-lisp . t)
+     (sh . t)
      (latex . t)
      (org . t)
      (sqlite . t)
@@ -312,7 +337,7 @@
          (indent-region)))
 (define-key org-mode-map "\C-\M-\\" 'dan/org-indent-region)
 
-;; Keybinding for R code bloks: 
+;; Keybinding for R code bloks:
 (defun dan/org-underscore-command ()
      (interactive)
      (or (org-babel-do-key-sequence-in-edit-buffer "_")
@@ -337,12 +362,12 @@
 ;; ------ Highlight certain phrases in org-mode ------
 
 (global-hi-lock-mode 1)
-(defface af-bold-blue-box '((t  (:background  "PaleTurquoise" 
+(defface af-bold-blue-box '((t  (:background  "PaleTurquoise"
                                    :foreground  "red"
                                    :height 130
                                    :bold t
                                   )))  "blue-box-face")
-(defface af-bold-plum-box '((t  (:background  "plum" 
+(defface af-bold-plum-box '((t  (:background  "plum"
                                    :foreground  "black"
                                    :height 110
                                    :bold t
@@ -350,10 +375,10 @@
 
 (defun z-hi-lock-quizzes ()
   ;; this next line is necessary to correct sloppy hi-locking
-  (if (not hi-lock-mode) 
-      (progn (hi-lock-mode -1) 
-             (hi-lock-mode  1)) 
-    (hi-lock-mode) 
+  (if (not hi-lock-mode)
+      (progn (hi-lock-mode -1)
+             (hi-lock-mode  1))
+    (hi-lock-mode)
     (hi-lock-mode))
 ;  (highlight-regexp "\\fab\{" (quote af-bold-blue-box));
   (highlight-regexp "\\(\\\\fab\\)\\>" (quote af-bold-blue-box));
@@ -372,6 +397,7 @@
 ;;==============================================================================
 ;;================== THEME SETTINGS ============================================
 ;;==============================================================================
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -402,4 +428,3 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-
