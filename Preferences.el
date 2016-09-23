@@ -69,8 +69,19 @@
 (setq sql-mysql-options '("-C" "-t" "-f" "-n"))
 
 ;; polymode
-(require 'poly-R)
-(require 'poly-markdown)
+;(require 'poly-R)
+;(require 'poly-markdown)
+
+;; Markdown
+(autoload 'markdown-mode "markdown-mode"
+   "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+(autoload 'gfm-mode "gfm-mode"
+   "Major mode for editing GitHub Flavored Markdown files" t)
+(add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+
 
 ;; SPARQL mode
 (autoload 'sparql-mode "sparql-mode.el"
@@ -115,6 +126,13 @@
 ; add keybinding for this (should be called when on remote)
 (global-set-key (kbd "C-c R") 'remote-R)
 
+;; define some keystrokes for R
+(require 'key-chord)
+(key-chord-mode 1)
+(key-chord-define-global ">>" "%>%")
+(key-chord-define-global "%%" "%in%")
+(key-chord-define-global "**" "%*%")
+
 ;;==============================================================================
 ;;================== BUFFERS ===================================================
 ;;==============================================================================
@@ -146,12 +164,7 @@
 ;(add-hook 'python-mode-hook 'auto-complete-mode)
 (global-auto-complete-mode t)
 
-;; Markdown
-(autoload 'markdown-mode "markdown-mode"
-       "Major mode for editing Markdown files" t)
-    (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
-    (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-    (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
 
 ;; rainbow delimiters
 (when (require 'rainbow-delimiters nil 'noerror)
@@ -196,28 +209,26 @@
  
 
 ;; Formatting Style 
-;;
 
-(add-to-list 'ess-style-alist
-             '(my-ess-style
-               (ess-indent-level . 4)
-               (ess-first-continued-statement-offset . 2)
-               (ess-continued-statement-offset . 0)
-               (ess-brace-offset . -4)
-               (ess-expression-offset . 4)
-               (ess-else-offset . 0)
-               (ess-close-brace-offset . 0)
-               (ess-brace-imaginary-offset . 0)
-               (ess-continued-brace-offset . 0)
-               (ess-arg-function-offset . 4)
-           (ess-arg-function-offset-new-line . '(4))
-               ))
-(setq ess-default-style 'my-ess-style)
 
-(require 'key-chord)
-(key-chord-mode 1)
-(key-chord-define ess-mode-map ">>" "%>%")
-(key-chord-define ess-mode-map "%%" "%in%")
+(defun my-ess-hook ()
+    (smartscan-mode 1)
+    (setq ess-nuke-trailing-whitespace-p nil)
+    (setq ess-first-continued-statement-offset 4
+          ess-continued-statement-offset 0)
+    )
+(defun my-postinit-ess ()
+  "my ess init code run after package-initialize"
+  (require 'ess)
+  (require 'ess-site)
+  (setq-default ess-dialect "R"
+                inferior-R-args "--no-save "
+                ess-nuke-trailing-whitespace-p nil
+                ess-ask-for-ess-directory nil)
+  (add-hook 'ess-mode-hook 'my-ess-hook)
+  )
+(add-hook 'after-init-hook 'my-postinit-ess)
+
 
 ;;++++++++++++++++ PYTHON ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 (require 'python-mode)
@@ -285,11 +296,40 @@
 ;(transient-mark-mode 1)
 
 ;; from: http://aaronbedra.com/emacs.d/
-(setq org-log-done t
-      org-todo-keywords '((sequence "TODO" "DONE" "INPROGRESS" "SOMEDAY" ))
-      org-todo-keyword-faces '(("INPROGRESS" . (:foreground "DarkOrchid1" :weight bold))
-			       ("SOMEDAY" . (:foreground "salmon" :weight bold)))
-      )
+;(setq org-log-done t
+;      org-todo-keywords '((sequence "TODO" "DONE" "INPROGRESS" "SOMEDAY" ))
+;      org-todo-keyword-faces '(("INPROGRESS" . (:foreground "DarkOrchid1" :weight bold))
+;			       ("SOMEDAY" . (:foreground "salmon" :weight bold))
+;			       ("DONE" . (:foreground "aquamarine" :weight bold)))
+;      )
+
+
+(setq org-todo-keywords
+      (quote ((sequence "TODO(t)" "NEXT(n)" "ACTIVE(i/!)" "|" "DONE(d)")
+              (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
+
+(setq org-todo-keyword-faces
+      (quote (("TODO" :foreground "red" :weight bold)
+              ("NEXT" :foreground "DeepPink" :weight bold)
+	      ("ACTIVE" :foreground "turquoise1" :weight bold)
+              ("DONE" :foreground "forest green" :weight bold)
+              ("WAITING" :foreground "orange" :weight bold)
+              ("HOLD" :foreground "magenta" :weight bold)
+              ("CANCELLED" :foreground "forest green" :weight bold)
+              ("MEETING" :foreground "forest green" :weight bold)
+              ("PHONE" :foreground "forest green" :weight bold))))
+
+
+(setq org-todo-state-tags-triggers
+      (quote (("CANCELLED" ("CANCELLED" . t))
+              ("WAITING" ("WAITING" . t))
+              ("HOLD" ("WAITING") ("HOLD" . t))
+              (done ("WAITING") ("HOLD"))
+              ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
+
+
 
 
 ;; LATEX export code blocks
